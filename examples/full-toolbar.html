@@ -7,14 +7,16 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 		
 		<link href="../external/google-code-prettify/prettify.css" rel="stylesheet" />
-		<link rel="stylesheet" href="http://netdna.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css" />
+		<link href="http://netdna.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css" rel="stylesheet" />
 		<link href="http://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet" />
+		<link href="../external/bootstrap-colorpicker/css/bootstrap-colorpicker.css" rel="stylesheet" />
 
 		<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
 		<script src="../external/jquery.hotkeys.js"></script>
 		<script src="http://netdna.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js"></script>
 		<script src="../external/google-code-prettify/prettify.js"></script>
 		<script src="../external/bootbox.min.js"></script>
+		<script src="../external/bootstrap-colorpicker/js/bootstrap-colorpicker.js"></script>
 		
 		<link href="../css/style.css" rel="stylesheet" />
 		<script src="../src/bootstrap-wysiwyg.js"></script>
@@ -25,19 +27,30 @@
 
 			<h2>Simple HTML Editor</h2>
 			<h4>This example...</h4>
-			<ul>
-				<li>Uses bootstrap (tooltips, dropdowns, modal dialog, ...)</li>
-				<li>Uses bootbox for bootstrap modal</li>
-				<li>Uses font-awesome icons</li>
-				<li>Improves support for hyperlinks</li>
-				<li>Adds more common buttons to the toolbar (format, font, super/sub-script, table, ...)</li>
-				<li>Prettyfies the image upload button</li>
-				<li>Makes the editor resizable (in supported browsers)</li>
-			</ul>
+
+			<div class="row">
+				<div class="col-md-5">
+					<ul>
+						<li>Uses bootstrap (tooltips, dropdowns, modal dialog)</li>
+						<li>Uses bootbox for bootstrap modals</li>
+						<li>Uses bootstrap-colorpicker</li>
+						<li>Uses font-awesome icons</li>
+					</ul>
+				</div>
+				<div class="col-md-7">
+					<ul>
+						<li>Adds more common buttons to the toolbar (format, font, super/sub-script, table, fore/back-color)</li>
+						<li>Improves support for hyperlinks</li>
+						<li>Prettyfies the image upload button</li>
+						<li>Makes the editor resizable (in supported browsers)</li>
+					</ul>
+				</div>
+			</div>
+
 			<div class="btn-toolbar" data-role="editor-toolbar" data-target="#editor">
 		
-				<input id="file_select" type="file" data-target="#pictureBtn" data-edit="insertImage" style="display:none" />
-				
+				<input id="input-file-select" type="file" data-target="#tool-file" data-edit="insertImage" style="display:none" />
+
 				<div class="btn-group">
 			        <a class="btn btn-gray dropdown-toggle" data-toggle="dropdown" title="Format">
 			        	<i class="fa fa-header"></i> <b class="caret"></b>
@@ -115,7 +128,7 @@
 				</div>
 
 				<div class="btn-group">
-					<a class="btn btn-gray" title="Insert picture (or just drag &amp; drop)" id="pictureBtn" onclick="$('#file_select').click()"><i class="fa fa-photo"></i></a>
+					<a id="tool-file" class="btn btn-gray" title="Insert picture (or just drag &amp; drop)" onclick="$('#input-file-select').click()"><i class="fa fa-photo"></i></a>
 				</div>
 
 				<div class="btn-group">
@@ -124,7 +137,12 @@
 				</div>
 
 				<div class="btn-group">
-					<a class="btn btn-gray" title="Create table" data-toggle="modal"><i class="fa fa-table"></i></a>
+					<a class="btn btn-gray" title="Create table" data-toggle="modal" data-tool="table"><i class="fa fa-table"></i></a>
+				</div>
+
+				<div class="btn-group">
+					<a class="btn btn-gray" title="Text color" data-tool="foreColor"><i class="glyphicon glyphicon-text-color"></i></a>
+					<a class="btn btn-gray" title="Background color" data-tool="backColor"><i class="glyphicon glyphicon-text-background"></i></a>
 				</div>
 
 				<input type="text" data-edit="inserttext" id="voiceBtn" x-webkit-speech="">
@@ -155,6 +173,8 @@
 		    	$('.dropdown-menu input').click(function() {return false;})
 				    .change(function () {$(this).parent('.dropdown-menu').siblings('.dropdown-toggle').dropdown('toggle');})
 		        .keydown('esc', function () {this.value='';$(this).change();});
+
+		      $('[data-tool=foreColor],[data-tool=backColor]').colorpicker();
 
 		      if ("onwebkitspeechchange" in document.createElement("input")) {
 		        var editorOffset = $('#editor').offset();

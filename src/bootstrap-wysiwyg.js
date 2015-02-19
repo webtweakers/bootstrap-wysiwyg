@@ -207,10 +207,21 @@
 				toolbar.find('[data-toggle=dropdown]')
 					.click(restoreSelection);
 
-				toolbar.find('[data-toggle=modal]')
+				// inser table
+				toolbar.find('[data-tool=table]')
 					.click(function() {
 						restoreSelection();
 						createTable();
+					});
+
+				// foreground color / background color (uses bootstrap-colorpicker)
+				toolbar.find('[data-tool=foreColor],[data-tool=backColor]')
+					.on('changeColor.colorpicker', function(event) {
+						var color = event.color.toHex();
+						restoreSelection();
+						editor.focus();
+						execCommand($(this).data('tool'), color);
+						saveSelection();
 					});
 
 				toolbar.find('input[type=text][data-' + options.commandRole + ']')
