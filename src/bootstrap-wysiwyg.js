@@ -8,33 +8,6 @@
  */
 (function ($) {
 	'use strict';
-	/** underscoreThrottle()
-	 * 	From underscore http://underscorejs.org/docs/underscore.html
-	 */
-	var underscoreThrottle = function(func, wait) {
-		var context, args, timeout, result;
-		var previous = 0;
-		var later = function() {
-			previous = new Date;
-			timeout = null;
-			result = func.apply(context, args);
-		};
-		return function() {
-			var now = new Date;
-			var remaining = wait - (now - previous);
-			context = this;
-			args = arguments;
-			if (remaining <= 0) {
-				clearTimeout(timeout);
-				timeout = null;
-				previous = now;
-				result = func.apply(context, args);
-			} else if (!timeout) {
-				timeout = setTimeout(later, remaining);
-			}
-			return result;
-		};
-	}
 	var readFileIntoDataUrl = function (fileInfo) {
 		var loader = $.Deferred(),
 			fReader = new FileReader();
@@ -77,6 +50,7 @@
 			selectedRange,
 			options,
 			toolbarBtnSelector,
+
 			updateToolbar = function () {
 				if (options.activeToolbarClass) {
 					$(options.toolbarSelector,wrapper).find(toolbarBtnSelector).each(function () {
@@ -96,6 +70,7 @@
 					});
 				}
 			},
+
 			execCommand = function (commandWithArgs, valueArg) {
 				var commandArr = commandWithArgs.split(' '),
 					command = commandArr.shift(),
@@ -113,6 +88,7 @@
 				editor.trigger('change');
 				updateToolbar();
 			},
+
 			bindHotkeys = function (hotKeys) {
 				$.each(hotKeys, function (hotkey, command) {
 					editor.keydown(hotkey, function (e) {
@@ -131,6 +107,7 @@
 
 				editor.keyup(function(){ editor.trigger('change'); });
 			},
+
 			getCurrentRange = function () {
                 var sel, range;
                 if (window.getSelection) {
@@ -142,9 +119,11 @@
                     range = document.selection.createRange();
                 } return range;
 			},
+
 			saveSelection = function () {
 				selectedRange = getCurrentRange();
 			},
+
 			restoreSelection = function () {
 				var selection;
                 if (window.getSelection || document.createRange) {
@@ -200,6 +179,7 @@
 					}
 				});
 			},
+
 			markSelection = function (input, color) {
 				restoreSelection();
 				if (document.queryCommandSupported('hiliteColor')) {
@@ -208,51 +188,67 @@
 				saveSelection();
 				input.data(options.selectionMarker, color);
 			},
+
 			bindToolbar = function (toolbar, options) {
-				toolbar.find(toolbarBtnSelector, wrapper).click(function () {
-					restoreSelection();
-					editor.focus();
-
-                    if ($(this).data(options.commandRole) === 'html') {
-                        toggleHtmlEdit();
-                    }
-                    else {
-                    	execCommand($(this).data(options.commandRole));
-                    }
-					saveSelection();
-				});
-				toolbar.find('[data-toggle=dropdown]').click(restoreSelection);
-
-				toolbar.find('input[type=text][data-' + options.commandRole + ']').on('webkitspeechchange change', function () {
-					var newValue = this.value; /* ugly but prevents fake double-calls due to selection restoration */
-					this.value = '';
-					restoreSelection();
-					if (newValue) {
+				toolbar.find(toolbarBtnSelector, wrapper)
+					.click(function () {
+						restoreSelection();
 						editor.focus();
-						execCommand($(this).data(options.commandRole), newValue);
-					}
-					saveSelection();
-				}).on('focus', function () {
-					var input = $(this);
-					if (!input.data(options.selectionMarker)) {
-						markSelection(input, options.selectionColor);
-						input.focus();
-					}
-				}).on('blur', function () {
-					var input = $(this);
-					if (input.data(options.selectionMarker)) {
-						markSelection(input, false);
-					}
-				});
-				toolbar.find('input[type=file][data-' + options.commandRole + ']').change(function () {
-					restoreSelection();
-					if (this.type === 'file' && this.files && this.files.length > 0) {
-						insertFiles(this.files);
-					}
-					saveSelection();
-					this.value = '';
-				});
+
+	                    if ($(this).data(options.commandRole) === 'html') {
+	                        toggleHtmlEdit();
+	                    }
+	                    else {
+	                    	execCommand($(this).data(options.commandRole));
+	                    }
+						saveSelection();
+					});
+
+				toolbar.find('[data-toggle=dropdown]')
+					.click(restoreSelection);
+
+				toolbar.find('[data-toggle=modal]')
+					.click(function() {
+						restoreSelection();
+						createTable();
+					});
+
+				toolbar.find('input[type=text][data-' + options.commandRole + ']')
+					.on('webkitspeechchange change', function () {
+						var newValue = this.value; /* ugly but prevents fake double-calls due to selection restoration */
+						this.value = '';
+						restoreSelection();
+						if (newValue) {
+							editor.focus();
+							execCommand($(this).data(options.commandRole), newValue);
+						}
+						saveSelection();
+					})
+					.on('focus', function () {
+						var input = $(this);
+						if (!input.data(options.selectionMarker)) {
+							markSelection(input, options.selectionColor);
+							input.focus();
+						}
+					})
+					.on('blur', function () {
+						var input = $(this);
+						if (input.data(options.selectionMarker)) {
+							markSelection(input, false);
+						}
+					});
+
+				toolbar.find('input[type=file][data-' + options.commandRole + ']')
+					.change(function () {
+						restoreSelection();
+						if (this.type === 'file' && this.files && this.files.length > 0) {
+							insertFiles(this.files);
+						}
+						saveSelection();
+						this.value = '';
+					});
 			},
+
 			initFileDrops = function () {
 				editor.on('dragenter dragover', false)
 					.on('drop', function (e) {
@@ -263,6 +259,68 @@
 							insertFiles(dataTransfer.files);
 						}
 					});
+			},
+
+			createTable = function() {
+				bootbox.dialog({
+	                title: "Define table dimensions",
+	                message: 
+				        '<form class="form-horizontal">' +
+				        '  <div class="form-group">' +
+						'    <label for="inputRows" class="col-sm-2 control-label">Rows</label>' +
+						'    <div class="col-sm-10">' +
+						'      <input type="text" class="form-control" id="inputRows" placeholder="Rows">' +
+						'    </div>' +
+						'  </div>' +
+						'  <div class="form-group">' +
+						'    <label for="inputCols" class="col-sm-2 control-label">Columns</label>' +
+						'    <div class="col-sm-10">' +
+						'      <input type="text" class="form-control" id="inputCols" placeholder="Columns">' +
+						'    </div>' +
+						'  </div>' +
+				        '</form>',
+	                buttons: {
+	                	default: {
+	                		label: "Close",
+	                		className: "btn-default"
+	                	},
+	                    success: {
+	                        label: "Create table",
+	                        className: "btn-success",
+	                        callback: function () {
+            			  		var rows = parseInt($('#inputRows').val());
+						  		var cols = parseInt($('#inputCols').val());
+
+							  	if ((rows > 0) && (cols > 0)) {
+							      var table = $("<table>");
+							      table.attr("border", "1");
+							      table.attr("cellpadding", "2");
+							      table.attr("cellspacing", "2");
+							      var tbody = $("<tbody>");
+							      for (var i=0; i < rows; i++) {
+							        var tr = $("<tr>");
+							        for (var j=0; j < cols; j++) {
+							          var td = $("<td>");
+							          var br = $("<br>");
+							          td.append(br);
+							          tr.append(td);
+							        }
+							        tbody.append(tr);
+							      }
+							      table.append(tbody);
+
+								  restoreSelection();
+								  editor.focus();
+
+							      execCommand('insertHTML', table.get(0).outerHTML);
+
+							      saveSelection();
+							      
+							    }
+	                        }
+	                    }
+	                }
+	            });
 			};
 		options = $.extend(true, {}, $.fn.wysiwyg.defaults, userOptions);
 		toolbarBtnSelector = 'a[data-' + options.commandRole + '],button[data-' + options.commandRole + '],input[type=button][data-' + options.commandRole + ']';
@@ -289,6 +347,9 @@
 		if (options.dragAndDropImages) {
 			initFileDrops();
 		}
+
+		execCommand('styleWithCSS', options.styleWithCSS);
+		execCommand('enableObjectResizing', options.enableObjectResizing);
 		bindToolbar($(options.toolbarSelector), options);
 		editor.attr('contenteditable', true)
 			.on('mouseup keyup mouseout', function () {
@@ -326,7 +387,8 @@
 		selectionMarker: 'edit-focus-marker',
 		selectionColor: 'darkgrey',
 		dragAndDropImages: true,
-		keypressTimeout: 200,
+		styleWithCSS: false,
+		enableObjectResizing: false,
 		fileUploadError: function (reason, detail) { console.log("File upload error", reason, detail); }
 	};
 }(window.jQuery));
