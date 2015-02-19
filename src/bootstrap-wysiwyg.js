@@ -79,7 +79,7 @@
 			toolbarBtnSelector,
 			updateToolbar = function () {
 				if (options.activeToolbarClass) {
-					$(options.toolbarSelector,wrapper).find(toolbarBtnSelector).each(underscoreThrottle(function () {
+					$(options.toolbarSelector,wrapper).find(toolbarBtnSelector).each(function () {
 						var commandArr = $(this).data(options.commandRole).split(' '),
 							command = commandArr[0];
 
@@ -93,7 +93,7 @@
 						} else {
 							$(this).removeClass(options.activeToolbarClass);
 						}
-					}, options.keypressTimeout));
+					});
 				}
 			},
 			execCommand = function (commandWithArgs, valueArg) {
