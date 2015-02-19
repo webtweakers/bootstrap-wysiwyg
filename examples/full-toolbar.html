@@ -128,6 +128,10 @@
 				</div>
 
 				<div class="btn-group">
+					<a class="btn btn-gray" data-edit="inserthorizontalrule" title="Insert horizontal rule"><i class="fa fa-minus"></i></a>
+				</div>
+
+				<div class="btn-group">
 					<a id="tool-file" class="btn btn-gray" title="Insert picture (or just drag &amp; drop)" onclick="$('#input-file-select').click()"><i class="fa fa-photo"></i></a>
 				</div>
 
@@ -184,7 +188,7 @@
 		      }
 			};
 
-			function showErrorAlert (reason, detail) {
+			function showErrorAlert(reason, detail) {
 				var msg='';
 				if (reason==='unsupported-file-type') { msg = "Unsupported format " +detail; }
 				else {
@@ -199,7 +203,8 @@
 			$('#editor').wysiwyg({
 				fileUploadError: showErrorAlert,
 				styleWithCSS: true,
-				enableObjectResizing: true
+				enableObjectResizing: true,
+				enableInlineTableEditing: true
 			});
 
 		    window.prettyPrint && prettyPrint();

@@ -400,6 +400,7 @@
 		dragAndDropImages: true,
 		styleWithCSS: false,
 		enableObjectResizing: false,
+		enableInlineTableEditing: false,
 		fileUploadError: function (reason, detail) { console.log("File upload error", reason, detail); }
 	};
 }(window.jQuery));
